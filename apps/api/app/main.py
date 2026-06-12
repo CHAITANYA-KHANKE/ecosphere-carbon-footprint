@@ -3,13 +3,20 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 from typing import Dict, Any
-import os
+from pathlib import Path
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from pydantic import BaseModel, Field
+from typing import Dict, Any
 
 from app.core.calculations import (
     calculate_transport_emissions,
     calculate_utility_emissions,
     calculate_diet_emissions
 )
+
+FRONTEND_INDEX = Path(__file__).resolve().parent.parent.parent / "web" / "index.html"
 
 app = FastAPI(
     title="EcoSphere Carbon Calculation Engine",
@@ -106,5 +113,12 @@ def get_summary_emissions(data: ComprehensiveRequest) -> Dict[str, Any]:
 
 @app.get("/app")
 def serve_frontend():
-    frontend_path = os.path.join(os.path.dirname(__file__), "..", "..", "..", "web", "index.html")
-    return FileResponse(frontend_path)
+    if not FRONTEND_INDEX.exists():
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "error": "Frontend not found",
+                "path": str(FRONTEND_INDEX)
+            }
+        )
+    return FileResponse(str(FRONTEND_INDEX))
