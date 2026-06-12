@@ -471,30 +471,6 @@
       diet: { meat_heavy: 7.20, meat_medium: 5.40, vegetarian: 3.80, vegan: 2.90 }
     };
 
-    let apiOnline = false;
-
-    // Verify Backend Status
-    async function checkEngineStatus() {
-      const statusDot = document.getElementById("statusDot");
-      const statusText = document.getElementById("statusText");
-      
-      try {
-        const res = await fetch("http://127.0.0.1:8000/");
-        if (res.ok) {
-          apiOnline = true;
-          statusDot.className = "status-dot active";
-          statusText.innerText = "Calculation Engine Online (API Mode)";
-        } else {
-          throw new Error();
-        }
-      } catch (e) {
-        apiOnline = false;
-        statusDot.className = "status-dot fallback";
-        statusText.innerText = "Offline (Local Calculation Mode)";
-      }
-      calculateEmissions();
-    }
-
     // Main Calculation Controller
     async function calculateEmissions() {
       // Get Values from DOM
@@ -515,31 +491,31 @@
       let dietEmissions = 0;
       let totalEmissions = 0;
 
-      if (apiOnline) {
-        // Fetch from Python FastAPI Server
-        try {
-          const res = await fetch("http://127.0.0.1:8000/calculate/summary", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              transport: { distance_km: distance, vehicle_type: vehicleType },
-              utility: { energy_kwh: energy, fuel_type: fuelType },
-              diet: { days: days, diet_type: dietType }
-            })
-          });
+      // Always try to use the host API first (works when deployed on same domain)
+      try {
+        const res = await fetch("/calculate/summary", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            transport: { distance_km: distance, vehicle_type: vehicleType },
+            utility: { energy_kwh: energy, fuel_type: fuelType },
+            diet: { days: days, diet_type: dietType }
+          })
+        });
+        if (res.ok) {
           const data = await res.json();
           transportEmissions = data.breakdown.transport_kg_co2e;
           utilityEmissions = data.breakdown.utility_kg_co2e;
           dietEmissions = data.breakdown.diet_kg_co2e;
           totalEmissions = data.total_emissions_kg_co2e;
-        } catch (e) {
-          console.warn("FastAPI fetch failed, falling back to client-side engine.");
-          apiOnline = false;
-          checkEngineStatus();
-          return;
+          apiOnline = true;
+        } else {
+          throw new Error();
         }
-      } else {
-        // Fallback: Local Client Side Computation
+      } catch (e) {
+        apiOnline = false;
+        document.getElementById("statusDot").className = "status-dot fallback";
+        document.getElementById("statusText").innerText = "Offline (Local Calculation Mode)";
         transportEmissions = Math.round(distance * LOCAL_FACTORS.transport[vehicleType] * 1000) / 1000;
         utilityEmissions = Math.round(energy * LOCAL_FACTORS.utility[fuelType] * 1000) / 1000;
         dietEmissions = Math.round(days * LOCAL_FACTORS.diet[dietType] * 1000) / 1000;
@@ -593,7 +569,7 @@
     }
 
     // Run on startup
-    window.onload = checkEngineStatus;
+    window.onload = calculateEmissions;
   </script>
 </body>
 </html>

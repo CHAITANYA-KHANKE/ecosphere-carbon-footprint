@@ -1,7 +1,9 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 from typing import Dict, Any
+import os
 
 from app.core.calculations import (
     calculate_transport_emissions,
@@ -101,3 +103,8 @@ def get_summary_emissions(data: ComprehensiveRequest) -> Dict[str, Any]:
         }
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+@app.get("/app")
+def serve_frontend():
+    frontend_path = os.path.join(os.path.dirname(__file__), "..", "..", "..", "web", "index.html")
+    return FileResponse(frontend_path)
