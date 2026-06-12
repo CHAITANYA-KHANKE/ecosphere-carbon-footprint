@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EcoSphere — Carbon Footprint Tracker</title>
+  
+  <!-- Premium Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* Design Tokens & Theme Variable Palette */
+    :root {
+      --bg-dark: #0f172a;
+      --bg-card: rgba(30, 41, 59, 0.7);
+      --border-card: rgba(255, 255, 255, 0.08);
+      --primary: #10b981;      /* Emerald eco accent */
+      --primary-glow: rgba(16, 185, 129, 0.15);
+      --secondary: #6366f1;    /* Indigo */
+      --secondary-glow: rgba(99, 102, 241, 0.15);
+      --accent: #f43f5e;       /* Rose for high footprint warnings */
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --font-display: 'Outfit', sans-serif;
+      --font-sans: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      transition: all 0.25s ease;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: radial-gradient(circle at 10% 20%, rgba(16, 185, 129, 0.05) 0%, transparent 40%),
+                        radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.05) 0%, transparent 45%);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      overflow-x: hidden;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Premium Header */
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    header h1 {
+      font-family: var(--font-display);
+      font-size: 3rem;
+      font-weight: 800;
+      letter-spacing: -0.05em;
+      background: linear-gradient(135deg, #34d399 0%, #6366f1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      font-weight: 300;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      margin-top: 1rem;
+      padding: 0.4rem 1rem;
+      border-radius: 9999px;
+      background: rgba(30, 41, 59, 0.9);
+      border: 1px solid var(--border-card);
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 8px;
+      background-color: #e2e8f0;
+    }
+
+    .status-dot.active {
+      background-color: var(--primary);
+      box-shadow: 0 0 10px var(--primary);
+      animation: pulse 1.8s infinite;
+    }
+
+    .status-dot.fallback {
+      background-color: #f59e0b;
+      box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(0.9); opacity: 0.6; }
+      50% { transform: scale(1.15); opacity: 1; }
+      100% { transform: scale(0.9); opacity: 0.6; }
+    }
+
+    /* Grid Layout */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+
+    @media (min-width: 900px) {
+      .dashboard-grid {
+        grid-template-columns: 1.2fr 1fr;
+      }
+    }
+
+    /* Glassmorphism Cards */
+    .card {
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border-card);
+      border-radius: 24px;
+      padding: 2rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .card-title {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding-bottom: 0.75rem;
+    }
+
+    /* Input Controls */
+    .input-group {
+      margin-bottom: 2rem;
+    }
+
+    .input-label {
+      display: flex;
+      justify-content: space-between;
+      color: var(--text-main);
+      font-weight: 600;
+      font-size: 0.95rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .input-label span.value {
+      color: var(--primary);
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+    }
+
+    /* Sliders */
+    .slider {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: #334155;
+      outline: none;
+    }
+
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--primary);
+      cursor: pointer;
+      box-shadow: 0 0 10px var(--primary);
+      transition: scale 0.15s;
+    }
+
+    .slider::-webkit-slider-thumb:hover {
+      scale: 1.25;
+    }
+
+    /* Select Dropdowns */
+    .select-dropdown {
+      width: 100%;
+      background: #1e293b;
+      border: 1px solid var(--border-card);
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      font-size: 1rem;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .select-dropdown:focus {
+      border-color: var(--primary);
+    }
+
+    /* Radial Chart */
+    .results-display {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .gauge-wrapper {
+      position: relative;
+      width: 240px;
+      height: 240px;
+      margin-bottom: 1.5rem;
+    }
+
+    .gauge-svg {
+      transform: rotate(-90deg);
+    }
+
+    .gauge-bg {
+      fill: none;
+      stroke: #1e293b;
+      stroke-width: 12;
+    }
+
+    .gauge-fill {
+      fill: none;
+      stroke: var(--primary);
+      stroke-width: 12;
+      stroke-linecap: round;
+      stroke-dasharray: 628; /* Circumference of r=100 */
+      stroke-dashoffset: 628;
+      transition: stroke-dashoffset 0.5s ease-out;
+    }
+
+    .gauge-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+
+    .gauge-text h2 {
+      font-family: var(--font-display);
+      font-size: 2.5rem;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .gauge-text p {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-top: 0.25rem;
+    }
+
+    /* Breakdown Bar Chart */
+    .breakdown-chart {
+      width: 100%;
+      margin: 2rem 0 1rem;
+    }
+
+    .bar-row {
+      margin-bottom: 1.25rem;
+    }
+
+    .bar-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+
+    .bar-track {
+      width: 100%;
+      height: 8px;
+      background: #1e293b;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      width: 0%;
+      transition: width 0.5s ease-out;
+    }
+
+    .bar-transport { background: var(--secondary); }
+    .bar-utility { background: #06b6d4; }
+    .bar-diet { background: var(--primary); }
+
+    /* Action Nudges Box */
+    .nudges-box {
+      margin-top: 1.5rem;
+      padding: 1.25rem;
+      border-radius: 16px;
+      background: rgba(16, 185, 129, 0.06);
+      border: 1px dashed rgba(16, 185, 129, 0.2);
+      text-align: left;
+      font-size: 0.9rem;
+      width: 100%;
+    }
+
+    .nudges-title {
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>EcoSphere Dashboard</h1>
+      <p>Real-time Carbon Footprint Calculator & Behavioral Simulator</p>
+      <div class="status-badge">
+        <div id="statusDot" class="status-dot"></div>
+        <span id="statusText">Checking engine...</span>
+      </div>
+    </header>
+
+    <div class="dashboard-grid">
+      <!-- Input Panel -->
+      <div class="card">
+        <div class="card-title">
+          🌱 Activity Metrics
+        </div>
+
+        <!-- Transportation -->
+        <div class="input-group">
+          <div class="input-label">
+            <span>Commuting & Travel</span>
+            <span class="value" id="distVal">100 km</span>
+          </div>
+          <input type="range" class="slider" id="distance" min="0" max="1000" value="100" oninput="calculateEmissions()">
+          <div style="margin-top: 0.75rem;">
+            <select class="select-dropdown" id="vehicleType" onchange="calculateEmissions()">
+              <option value="petrol_car_medium">Petrol Car (Medium size)</option>
+              <option value="diesel_car_medium">Diesel Car (Medium size)</option>
+              <option value="electric_car">Electric Car (EV)</option>
+              <option value="bus">Public Bus</option>
+              <option value="rail">Rail Train</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Utilities -->
+        <div class="input-group">
+          <div class="input-label">
+            <span>Monthly Grid Electricity</span>
+            <span class="value" id="energyVal">300 kWh</span>
+          </div>
+          <input type="range" class="slider" id="energy" min="0" max="1500" value="300" oninput="calculateEmissions()">
+          <div style="margin-top: 0.75rem;">
+            <select class="select-dropdown" id="fuelType" onchange="calculateEmissions()">
+              <option value="electricity_us_avg">US Power Grid (Average)</option>
+              <option value="electricity_eu_avg">European Power Grid (Average)</option>
+              <option value="electricity_green">100% Green / Solar Electricity</option>
+              <option value="natural_gas">Natural Gas Heating</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Diet -->
+        <div class="input-group" style="margin-bottom: 0;">
+          <div class="input-label">
+            <span>Diet Duration</span>
+            <span class="value" id="dietVal">30 Days</span>
+          </div>
+          <input type="range" class="slider" id="dietDays" min="1" max="365" value="30" oninput="calculateEmissions()">
+          <div style="margin-top: 0.75rem;">
+            <select class="select-dropdown" id="dietType" onchange="calculateEmissions()">
+              <option value="meat_medium">Average Diet (Moderate Meat)</option>
+              <option value="meat_heavy">Heavy Meat Diet (Beef/Lamb intensive)</option>
+              <option value="vegetarian">Vegetarian (No Meat)</option>
+              <option value="vegan">100% Vegan (Plant-based)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results Visualization Card -->
+      <div class="card results-display">
+        <div class="card-title" style="width:100%;">
+          📊 Carbon Summary
+        </div>
+
+        <!-- SVG Radial Gauge -->
+        <div class="gauge-wrapper">
+          <svg width="240" height="240" class="gauge-svg">
+            <circle cx="120" cy="120" r="100" class="gauge-bg" />
+            <circle cx="120" cy="120" r="100" class="gauge-fill" id="gaugeCircle" />
+          </svg>
+          <div class="gauge-text">
+            <h2 id="totalScore">0.0</h2>
+            <p>kg CO₂e</p>
+          </div>
+        </div>
+
+        <!-- Sector Breakdown Chart -->
+        <div class="breakdown-chart">
+          <!-- Transport Bar -->
+          <div class="bar-row">
+            <div class="bar-header">
+              <span>Transport</span>
+              <span id="transScore">0 kg</span>
+            </div>
+            <div class="bar-track">
+              <div class="bar-fill bar-transport" id="barTransport"></div>
+            </div>
+          </div>
+
+          <!-- Utility Bar -->
+          <div class="bar-row">
+            <div class="bar-header">
+              <span>Utilities</span>
+              <span id="utilScore">0 kg</span>
+            </div>
+            <div class="bar-track">
+              <div class="bar-fill bar-utility" id="barUtility"></div>
+            </div>
+          </div>
+
+          <!-- Diet Bar -->
+          <div class="bar-row">
+            <div class="bar-header">
+              <span>Diet</span>
+              <span id="dietScore">0 kg</span>
+            </div>
+            <div class="bar-track">
+              <div class="bar-fill bar-diet" id="barDiet"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Smart Nudges -->
+        <div class="nudges-box">
+          <div class="nudges-title">
+            ✨ Sustainable Recommendations
+          </div>
+          <p id="nudgeText">Calculating suggestions based on your ecological footprint...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Local fallback coefficients (to work even if Python server is not running)
+    const LOCAL_FACTORS = {
+      transport: { petrol_car_medium: 0.170, diesel_car_medium: 0.165, electric_car: 0.045, bus: 0.096, rail: 0.035 },
+      utility: { electricity_us_avg: 0.370, electricity_eu_avg: 0.230, electricity_green: 0.015, natural_gas: 0.185 },
+      diet: { meat_heavy: 7.20, meat_medium: 5.40, vegetarian: 3.80, vegan: 2.90 }
+    };
+
+    let apiOnline = false;
+
+    // Verify Backend Status
+    async function checkEngineStatus() {
+      const statusDot = document.getElementById("statusDot");
+      const statusText = document.getElementById("statusText");
+      
+      try {
+        const res = await fetch("http://127.0.0.1:8000/");
+        if (res.ok) {
+          apiOnline = true;
+          statusDot.className = "status-dot active";
+          statusText.innerText = "Calculation Engine Online (API Mode)";
+        } else {
+          throw new Error();
+        }
+      } catch (e) {
+        apiOnline = false;
+        statusDot.className = "status-dot fallback";
+        statusText.innerText = "Offline (Local Calculation Mode)";
+      }
+      calculateEmissions();
+    }
+
+    // Main Calculation Controller
+    async function calculateEmissions() {
+      // Get Values from DOM
+      const distance = parseFloat(document.getElementById("distance").value);
+      const vehicleType = document.getElementById("vehicleType").value;
+      const energy = parseFloat(document.getElementById("energy").value);
+      const fuelType = document.getElementById("fuelType").value;
+      const days = parseInt(document.getElementById("dietDays").value);
+      const dietType = document.getElementById("dietType").value;
+
+      // Update Slider Value Displays
+      document.getElementById("distVal").innerText = `${distance} km`;
+      document.getElementById("energyVal").innerText = `${energy} kWh`;
+      document.getElementById("dietVal").innerText = `${days} Days`;
+
+      let transportEmissions = 0;
+      let utilityEmissions = 0;
+      let dietEmissions = 0;
+      let totalEmissions = 0;
+
+      if (apiOnline) {
+        // Fetch from Python FastAPI Server
+        try {
+          const res = await fetch("http://127.0.0.1:8000/calculate/summary", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              transport: { distance_km: distance, vehicle_type: vehicleType },
+              utility: { energy_kwh: energy, fuel_type: fuelType },
+              diet: { days: days, diet_type: dietType }
+            })
+          });
+          const data = await res.json();
+          transportEmissions = data.breakdown.transport_kg_co2e;
+          utilityEmissions = data.breakdown.utility_kg_co2e;
+          dietEmissions = data.breakdown.diet_kg_co2e;
+          totalEmissions = data.total_emissions_kg_co2e;
+        } catch (e) {
+          console.warn("FastAPI fetch failed, falling back to client-side engine.");
+          apiOnline = false;
+          checkEngineStatus();
+          return;
+        }
+      } else {
+        // Fallback: Local Client Side Computation
+        transportEmissions = Math.round(distance * LOCAL_FACTORS.transport[vehicleType] * 1000) / 1000;
+        utilityEmissions = Math.round(energy * LOCAL_FACTORS.utility[fuelType] * 1000) / 1000;
+        dietEmissions = Math.round(days * LOCAL_FACTORS.diet[dietType] * 1000) / 1000;
+        totalEmissions = Math.round((transportEmissions + utilityEmissions + dietEmissions) * 1000) / 1000;
+      }
+
+      updateUI(transportEmissions, utilityEmissions, dietEmissions, totalEmissions);
+    }
+
+    // Update charts & dynamic components
+    function updateUI(tVal, uVal, dVal, total) {
+      document.getElementById("totalScore").innerText = total.toFixed(1);
+      document.getElementById("transScore").innerText = `${tVal.toFixed(1)} kg`;
+      document.getElementById("utilScore").innerText = `${uVal.toFixed(1)} kg`;
+      document.getElementById("dietScore").innerText = `${dVal.toFixed(1)} kg`;
+
+      // Update SVG circular progress
+      const circle = document.getElementById("gaugeCircle");
+      const maxTarget = 800; // Benchmark reference scale
+      const percentage = Math.min((total / maxTarget), 1);
+      const dashoffset = 628 - (628 * percentage);
+      circle.style.strokeDashoffset = dashoffset;
+
+      // Color coding gauge based on emissions level
+      if (total > 500) {
+        circle.style.stroke = "var(--accent)";
+      } else if (total > 200) {
+        circle.style.stroke = "var(--secondary)";
+      } else {
+        circle.style.stroke = "var(--primary)";
+      }
+
+      // Update Horizontal Bars
+      const maxSub = Math.max(tVal, uVal, dVal, 1);
+      document.getElementById("barTransport").style.width = `${(tVal / maxSub) * 100}%`;
+      document.getElementById("barUtility").style.width = `${(uVal / maxSub) * 100}%`;
+      document.getElementById("barDiet").style.width = `${(dVal / maxSub) * 100}%`;
+
+      // Generate dynamic context nudge recommendations
+      let nudge = "";
+      if (tVal > uVal && tVal > dVal) {
+        nudge = "⚡ Aapka commuting output sabse zyada hai! Carbon footprint kam karne ke liye public transit ka use badhayein ya EV standard adopt karein.";
+      } else if (uVal > tVal && uVal > dVal) {
+        nudge = "💡 Grid electricity ka use emissions badha raha hai. Light switch optimization karein ya Green Electricity Plan switch karein.";
+      } else if (dVal > tVal && dVal > uVal) {
+        nudge = "🥗 Diet footprint high hai. Vegetarian ya Plant-based food inputs badha kar aap instantly emissions check kar sakte hain.";
+      } else {
+        nudge = "🌳 Excellent status! Aapke patterns balanced hain. Carbon emission budgets optimize rakhne ke liye yahi behavior regular monitor karein.";
+      }
+      document.getElementById("nudgeText").innerText = nudge;
+    }
+
+    // Run on startup
+    window.onload = checkEngineStatus;
+  </script>
+</body>
+</html>

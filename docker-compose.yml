@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - ENV=development
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - redis
+
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    depends_on:
+      - api
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"

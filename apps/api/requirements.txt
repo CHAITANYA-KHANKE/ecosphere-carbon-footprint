@@ -1,0 +1,5 @@
+fastapi==0.109.0
+pydantic>=1.10.12,<2.0.0
+uvicorn==0.28.0
+pytest==8.1.1
+pytest-cov==4.1.0
