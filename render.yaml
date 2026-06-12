@@ -1,8 +1,7 @@
 services:
   - type: web
-    name: ecosphere-api
+    name: ecosphere-carbon-footprint
     runtime: python
-    region: oregon
     plan: free
     buildCommand: pip install -r apps/api/requirements.txt
     startCommand: cd apps/api && uvicorn app.main:app --host 0.0.0.0 --port $PORT
