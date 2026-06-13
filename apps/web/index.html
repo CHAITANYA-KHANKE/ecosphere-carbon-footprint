@@ -46,7 +46,7 @@
     }
 
     .container {
-      max-width: 1200px;
+      max-width: 1400px;
       margin: 0 auto;
     }
 
@@ -144,7 +144,7 @@
       100% { transform: scale(0.9); opacity: 0.6; }
     }
 
-    /* Grid Layout */
+    /* 3-Column Grid Layout */
     .dashboard-grid {
       display: grid;
       grid-template-columns: 1fr;
@@ -153,7 +153,13 @@
 
     @media (min-width: 900px) {
       .dashboard-grid {
-        grid-template-columns: 1.2fr 1fr;
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (min-width: 1200px) {
+      .dashboard-grid {
+        grid-template-columns: 1.1fr 1fr 1fr;
       }
     }
 
@@ -360,7 +366,7 @@
   <div class="container" id="dashboardContent">
     <header role="banner">
       <h1>EcoSphere Dashboard</h1>
-      <p id="greetingText">Real-time Carbon Footprint Calculator & Behavioral Simulator</p>
+      <p>Real-time Carbon Footprint Calculator & Behavioral Simulator</p>
       
       <div style="margin-top: 1rem; display: flex; gap: 1rem; justify-content: center; align-items: center;">
         <div class="status-badge" role="status" aria-live="polite">
@@ -371,7 +377,7 @@
     </header>
 
     <main id="main" class="dashboard-grid" role="main">
-      <!-- Input Panel -->
+      <!-- Card 1: Input Panel -->
       <section class="card" aria-label="Footprint Inputs">
         <div class="card-title">
           🌱 Activity Metrics
@@ -442,7 +448,7 @@
         </div>
       </section>
 
-      <!-- Results Visualization Card -->
+      <!-- Card 2: Results Visualization Card -->
       <section class="card results-display" aria-label="Footprint Results">
         <div class="card-title" style="width: 100%;">
           📊 Carbon Summary
@@ -509,6 +515,82 @@
           <p id="nudgeText">Calculating suggestions based on your ecological footprint...</p>
         </div>
       </section>
+
+      <!-- Card 3: New Offsets & Climate Benchmarks -->
+      <section class="card" aria-label="Offsets and Climate Benchmarks" style="display: flex; flex-direction: column;">
+        <div class="card-title">
+          🌳 Offsets & Targets
+        </div>
+        
+        <div style="display: flex; flex-direction: column; gap: 1.5rem; flex-grow: 1; justify-content: space-between;">
+          <!-- Annual Projection -->
+          <div style="background: rgba(99, 102, 241, 0.05); border: 1px solid rgba(99, 102, 241, 0.12); padding: 1.25rem; border-radius: 16px;">
+            <div style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Annualized Projection</div>
+            <div style="font-family: var(--font-display); font-size: 1.8rem; font-weight: 800; color: var(--secondary); margin-top: 0.25rem;" id="annualProjection" aria-live="polite">0.00 tonnes/year</div>
+          </div>
+
+          <!-- Tree Offset Simulator -->
+          <div style="background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.12); padding: 1.25rem; border-radius: 16px;">
+            <div style="font-weight: 700; color: var(--primary); margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.4rem; font-size: 0.95rem;">
+              <span>🌲 Tree Offset Simulator</span>
+            </div>
+            <p style="font-size: 0.88rem; line-height: 1.4; color: var(--text-main);">
+              Apne is annual carbon footprint ko offset karne ke liye aapko saal me kam se kam <strong style="color: var(--primary); font-size: 1.1rem; font-family: var(--font-display);" id="treesNeeded" aria-live="polite">0</strong> mature trees plant karne honge.
+            </p>
+          </div>
+
+          <!-- Benchmarks comparisons list -->
+          <div>
+            <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem; font-weight: 600;">Global Comparisons (Tonnes/Year)</div>
+            
+            <div style="display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.82rem;">
+              <!-- User value -->
+              <div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+                  <strong>Your Footprint (Projected)</strong>
+                  <strong id="userTonnes" aria-live="polite">0.00 t</strong>
+                </div>
+                <div class="bar-track" style="height: 6px;">
+                  <div class="bar-fill" id="barUserTonnes" style="background: var(--secondary); width: 0%;"></div>
+                </div>
+              </div>
+
+              <!-- Climate Target -->
+              <div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem; color: var(--text-muted);">
+                  <span>Paris Agreement Target</span>
+                  <span>2.0 t</span>
+                </div>
+                <div class="bar-track" style="height: 6px;">
+                  <div class="bar-fill" style="background: var(--primary); width: 12.5%;"></div>
+                </div>
+              </div>
+
+              <!-- India Avg -->
+              <div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem; color: var(--text-muted);">
+                  <span>India Average</span>
+                  <span>1.9 t</span>
+                </div>
+                <div class="bar-track" style="height: 6px;">
+                  <div class="bar-fill" style="background: #eab308; width: 11.8%;"></div>
+                </div>
+              </div>
+
+              <!-- US Avg -->
+              <div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem; color: var(--text-muted);">
+                  <span>US Average</span>
+                  <span>15.5 t</span>
+                </div>
+                <div class="bar-track" style="height: 6px;">
+                  <div class="bar-fill" style="background: var(--accent); width: 96.8%;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
   </div>
 
@@ -522,7 +604,7 @@
 
     let apiOnline = false;
 
-    // Dashboard initialization (Replaces old login session checks)
+    // Dashboard initialization
     function initDashboard() {
       restoreState();
       checkEngineStatus();
@@ -614,7 +696,7 @@
       saveState();
     }, 100);
 
-    // Responsive Slider Visual Feedback handler (instantly updates labels, throttles calculation)
+    // Responsive Slider Visual Feedback handler
     function handleSliderChange(sliderId, displayValId, unitSuffix) {
       const value = document.getElementById(sliderId).value;
       document.getElementById(displayValId).innerText = `${value}${unitSuffix}`;
@@ -723,6 +805,20 @@
       const dietPct = Math.round((dVal / maxSub) * 100);
       dietBar.style.width = `${dietPct}%`;
       dietBar.setAttribute("aria-valuenow", dietPct);
+
+      // --- Eco-Offsets & Targets calculations ---
+      const annualKg = total * 12;
+      const annualTonnes = annualKg / 1000;
+      const trees = Math.round(annualKg / 22);
+
+      document.getElementById("annualProjection").innerText = `${annualTonnes.toFixed(2)} tonnes/year`;
+      document.getElementById("treesNeeded").innerText = trees;
+      document.getElementById("userTonnes").innerText = `${annualTonnes.toFixed(2)} t`;
+
+      // Update comparison bars (Max scale reference: 16 tonnes)
+      const maxRef = 16;
+      const userPct = Math.min((annualTonnes / maxRef) * 100, 100);
+      document.getElementById("barUserTonnes").style.width = `${userPct}%`;
 
       // Generate dynamic recommendations
       let nudge = "";
