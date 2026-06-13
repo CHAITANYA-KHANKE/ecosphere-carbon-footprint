@@ -4,11 +4,7 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 from typing import Dict, Any
 from pathlib import Path
-from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
-from pydantic import BaseModel, Field
-from typing import Dict, Any
+from functools import lru_cache
 
 from app.core.calculations import (
     calculate_transport_emissions,
@@ -21,13 +17,29 @@ FRONTEND_INDEX = Path(__file__).resolve().parent.parent.parent / "web" / "index.
 app = FastAPI(
     title="EcoSphere Carbon Calculation Engine",
     description="Microservice to calculate greenhouse gas equivalencies (CO2e) for personal activities.",
-    version="1.0.0"
+    version="2.1.0"
 )
 
-# CORS middleware to allow communication from React/Next.js frontend
+# Custom HTTP Middleware to inject strict security headers (Clickjacking, MIME Sniffing, CSP compliance)
+@app.middleware("http")
+async def add_security_headers(request, call_next):
+    response = await call_next(request)
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Content-Security-Policy"] = (
+        "default-src 'self' https:; "
+        "script-src 'self' 'unsafe-inline'; "
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+        "font-src https://fonts.gstatic.com;"
+    )
+    return response
+
+# CORS configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Restrict this to frontend domain in production
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -51,9 +63,30 @@ class ComprehensiveRequest(BaseModel):
     utility: UtilityRequest
     diet: DietRequest
 
+@lru_cache(maxsize=1024)
+def _get_cached_summary(
+    dist: float, veh: str, kwh: float, fuel: str, days: int, diet: str
+) -> Dict[str, Any]:
+    """Helper method executing calculations under O(1) in-memory cache lookup."""
+    transport_val = calculate_transport_emissions(dist, veh)
+    utility_val = calculate_utility_emissions(kwh, fuel)
+    diet_val = calculate_diet_emissions(days, diet)
+    total = round(transport_val + utility_val + diet_val, 3)
+    
+    return {
+        "breakdown": {
+            "transport_kg_co2e": transport_val,
+            "utility_kg_co2e": utility_val,
+            "diet_kg_co2e": diet_val
+        },
+        "total_emissions_kg_co2e": total,
+        "unit": "kg CO2e",
+        "status": "success"
+    }
+
 @app.get("/")
 def read_root() -> Dict[str, str]:
-    return {"status": "healthy", "service": "EcoSphere Calculation Engine API"}
+    return {"status": "healthy", "service": "EcoSphere Calculation Engine API", "version": "2.1.0"}
 
 @app.post("/calculate/transport")
 def get_transport_emissions(data: TransportRequest) -> Dict[str, Any]:
@@ -94,20 +127,15 @@ def get_diet_emissions(data: DietRequest) -> Dict[str, Any]:
 @app.post("/calculate/summary")
 def get_summary_emissions(data: ComprehensiveRequest) -> Dict[str, Any]:
     try:
-        transport_val = calculate_transport_emissions(data.transport.distance_km, data.transport.vehicle_type)
-        utility_val = calculate_utility_emissions(data.utility.energy_kwh, data.utility.fuel_type)
-        diet_val = calculate_diet_emissions(data.diet.days, data.diet.diet_type)
-        
-        total = round(transport_val + utility_val + diet_val, 3)
-        return {
-            "breakdown": {
-                "transport_kg_co2e": transport_val,
-                "utility_kg_co2e": utility_val,
-                "diet_kg_co2e": diet_val
-            },
-            "total_emissions_kg_co2e": total,
-            "unit": "kg CO2e"
-        }
+        # Utilizing caching wrapper
+        return _get_cached_summary(
+            data.transport.distance_km,
+            data.transport.vehicle_type,
+            data.utility.energy_kwh,
+            data.utility.fuel_type,
+            data.diet.days,
+            data.diet.diet_type
+        )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
