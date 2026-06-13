@@ -4,21 +4,23 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>EcoSphere — Carbon Footprint Tracker</title>
-
+  
+  <!-- Premium Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
-
+  
   <style>
+    /* Design Tokens & Theme Variable Palette */
     :root {
       --bg-dark: #0f172a;
       --bg-card: rgba(30, 41, 59, 0.7);
       --border-card: rgba(255, 255, 255, 0.08);
-      --primary: #10b981;
+      --primary: #10b981;      /* Emerald eco accent */
       --primary-glow: rgba(16, 185, 129, 0.15);
-      --secondary: #6366f1;
+      --secondary: #6366f1;    /* Indigo */
       --secondary-glow: rgba(99, 102, 241, 0.15);
-      --accent: #f43f5e;
+      --accent: #f43f5e;       /* Rose for warnings */
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
       --font-display: 'Outfit', sans-serif;
@@ -37,7 +39,7 @@
       background-image: radial-gradient(circle at 10% 20%, rgba(16, 185, 129, 0.05) 0%, transparent 40%),
                         radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.05) 0%, transparent 45%);
       color: var(--text-main);
-      font-family: var(--font-sans);
+      font-family: var(--font-sans), system-ui, sans-serif;
       min-height: 100vh;
       overflow-x: hidden;
       padding: 2rem 1rem;
@@ -48,12 +50,13 @@
       margin: 0 auto;
     }
 
+    /* Skip Link for Accessibility */
     .skip-link {
       position: absolute;
       top: -40px;
       left: 0;
       background: var(--primary);
-      color: #fff;
+      color: #0f172a;
       padding: 8px 16px;
       z-index: 100;
       text-decoration: none;
@@ -81,6 +84,7 @@
       outline-offset: 2px;
     }
 
+    /* Premium Header */
     header {
       text-align: center;
       margin-bottom: 3rem;
@@ -140,6 +144,7 @@
       100% { transform: scale(0.9); opacity: 0.6; }
     }
 
+    /* Grid Layout */
     .dashboard-grid {
       display: grid;
       grid-template-columns: 1fr;
@@ -152,6 +157,7 @@
       }
     }
 
+    /* Glassmorphism Cards */
     .card {
       background: var(--bg-card);
       backdrop-filter: blur(12px);
@@ -174,6 +180,7 @@
       padding-bottom: 0.75rem;
     }
 
+    /* Input Controls */
     .input-group {
       margin-bottom: 2rem;
     }
@@ -193,6 +200,7 @@
       font-size: 1.1rem;
     }
 
+    /* Sliders */
     .slider {
       -webkit-appearance: none;
       width: 100%;
@@ -210,13 +218,9 @@
       background: var(--primary);
       cursor: pointer;
       box-shadow: 0 0 10px var(--primary);
-      transition: scale 0.15s;
     }
 
-    .slider::-webkit-slider-thumb:hover {
-      scale: 1.25;
-    }
-
+    /* Select Dropdowns */
     .select-dropdown {
       width: 100%;
       background: #1e293b;
@@ -234,6 +238,7 @@
       border-color: var(--primary);
     }
 
+    /* Gauge & Charts */
     .results-display {
       display: flex;
       flex-direction: column;
@@ -265,7 +270,7 @@
       stroke-linecap: round;
       stroke-dasharray: 628;
       stroke-dashoffset: 628;
-      transition: stroke-dashoffset 0.5s ease-out;
+      transition: stroke-dashoffset 0.4s ease-out;
     }
 
     .gauge-text {
@@ -320,7 +325,7 @@
       height: 100%;
       border-radius: 4px;
       width: 0%;
-      transition: width 0.5s ease-out;
+      transition: width 0.4s ease-out;
     }
 
     .bar-transport { background: var(--secondary); }
@@ -349,287 +354,331 @@
   </style>
 </head>
 <body>
+
   <a href="#main" class="skip-link">Skip to main content</a>
 
-  <div class="container">
+  <div class="container" id="dashboardContent">
     <header role="banner">
       <h1>EcoSphere Dashboard</h1>
-      <p>Real-time Carbon Footprint Calculator & Behavioral Simulator</p>
-      <div class="status-badge" role="status" aria-live="polite">
-        <div id="statusDot" class="status-dot"></div>
-        <span id="statusText">Checking engine...</span>
+      <p id="greetingText">Real-time Carbon Footprint Calculator & Behavioral Simulator</p>
+      
+      <div style="margin-top: 1rem; display: flex; gap: 1rem; justify-content: center; align-items: center;">
+        <div class="status-badge" role="status" aria-live="polite">
+          <div id="statusDot" class="status-dot"></div>
+          <span id="statusText">Checking engine...</span>
+        </div>
       </div>
     </header>
 
-    <main id="main" role="main">
-      <div class="dashboard-grid">
-        <section class="card" aria-labelledby="input-title">
-          <div class="card-title" id="input-title">
-            🌱 Activity Metrics
+    <main id="main" class="dashboard-grid" role="main">
+      <!-- Input Panel -->
+      <section class="card" aria-label="Footprint Inputs">
+        <div class="card-title">
+          🌱 Activity Metrics
+        </div>
+
+        <!-- Transportation -->
+        <div class="input-group">
+          <div class="input-label">
+            <label for="distance">Commuting & Travel</label>
+            <span class="value" id="distVal" aria-live="polite">100 km</span>
           </div>
-
-          <form id="activityForm" onsubmit="return false;" aria-label="Carbon footprint activity form">
-            <div class="input-group">
-              <div class="input-label">
-                <label for="distance" id="transport-label">Commuting & Travel</label>
-                <span class="value" id="distVal" aria-live="polite" aria-atomic="true">100 km</span>
-              </div>
-              <label for="distance" class="sr-only">Distance in kilometers</label>
-              <input
-                type="range"
-                class="slider"
-                id="distance"
-                name="distance"
-                min="0"
-                max="1000"
-                value="100"
-                aria-labelledby="transport-label"
-                aria-valuemin="0"
-                aria-valuemax="1000"
-                aria-valuenow="100"
-                oninput="calculateEmissions()"
-              >
-              <div style="margin-top: 0.75rem;">
-                <label for="vehicleType" class="sr-only">Vehicle type</label>
-                <select
-                  class="select-dropdown"
-                  id="vehicleType"
-                  name="vehicleType"
-                  onchange="calculateEmissions()"
-                  aria-label="Vehicle type"
-                >
-                  <option value="petrol_car_medium">Petrol Car (Medium size)</option>
-                  <option value="diesel_car_medium">Diesel Car (Medium size)</option>
-                  <option value="electric_car">Electric Car (EV)</option>
-                  <option value="bus">Public Bus</option>
-                  <option value="rail">Rail Train</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="input-group">
-              <div class="input-label">
-                <label for="energy" id="utility-label">Monthly Grid Electricity</label>
-                <span class="value" id="energyVal" aria-live="polite" aria-atomic="true">300 kWh</span>
-              </div>
-              <label for="energy" class="sr-only">Energy consumption in kWh</label>
-              <input
-                type="range"
-                class="slider"
-                id="energy"
-                name="energy"
-                min="0"
-                max="1500"
-                value="300"
-                aria-labelledby="utility-label"
-                aria-valuemin="0"
-                aria-valuemax="1500"
-                aria-valuenow="300"
-                oninput="calculateEmissions()"
-              >
-              <div style="margin-top: 0.75rem;">
-                <label for="fuelType" class="sr-only">Fuel or electricity type</label>
-                <select
-                  class="select-dropdown"
-                  id="fuelType"
-                  name="fuelType"
-                  onchange="calculateEmissions()"
-                  aria-label="Fuel or electricity type"
-                >
-                  <option value="electricity_us_avg">US Power Grid (Average)</option>
-                  <option value="electricity_eu_avg">European Power Grid (Average)</option>
-                  <option value="electricity_green">100% Green / Solar Electricity</option>
-                  <option value="natural_gas">Natural Gas Heating</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="input-group" style="margin-bottom: 0;">
-              <div class="input-label">
-                <label for="dietDays" id="diet-label">Diet Duration</label>
-                <span class="value" id="dietVal" aria-live="polite" aria-atomic="true">30 Days</span>
-              </div>
-              <label for="dietDays" class="sr-only">Number of days</label>
-              <input
-                type="range"
-                class="slider"
-                id="dietDays"
-                name="dietDays"
-                min="1"
-                max="365"
-                value="30"
-                aria-labelledby="diet-label"
-                aria-valuemin="1"
-                aria-valuemax="365"
-                aria-valuenow="30"
-                oninput="calculateEmissions()"
-              >
-              <div style="margin-top: 0.75rem;">
-                <label for="dietType" class="sr-only">Diet type</label>
-                <select
-                  class="select-dropdown"
-                  id="dietType"
-                  name="dietType"
-                  onchange="calculateEmissions()"
-                  aria-label="Diet type"
-                >
-                  <option value="meat_medium">Average Diet (Moderate Meat)</option>
-                  <option value="meat_heavy">Heavy Meat Diet (Beef/Lamb intensive)</option>
-                  <option value="vegetarian">Vegetarian (No Meat)</option>
-                  <option value="vegan">100% Vegan (Plant-based)</option>
-                </select>
-              </div>
-            </div>
-          </form>
-        </section>
-
-        <section class="card results-display" aria-labelledby="results-title">
-          <div class="card-title" id="results-title" style="width:100%;">
-            📊 Carbon Summary
+          <input type="range" class="slider" id="distance" min="0" max="1000" value="100" 
+                 oninput="handleSliderChange('distance', 'distVal', ' km')" 
+                 aria-valuemin="0" aria-valuemax="1000" aria-valuenow="100" aria-describedby="distVal">
+          
+          <div style="margin-top: 0.75rem;">
+            <label for="vehicleType" class="sr-only">Choose Vehicle Type</label>
+            <select class="select-dropdown" id="vehicleType" onchange="throttledCalculate()">
+              <option value="petrol_car_medium">Petrol Car (Medium size)</option>
+              <option value="diesel_car_medium">Diesel Car (Medium size)</option>
+              <option value="electric_car">Electric Car (EV)</option>
+              <option value="bus">Public Bus</option>
+              <option value="rail">Rail Train</option>
+            </select>
           </div>
+        </div>
 
-          <div class="gauge-wrapper" role="img" aria-label="Total carbon emissions gauge">
-            <svg width="240" height="240" class="gauge-svg" aria-hidden="true">
-              <circle cx="120" cy="120" r="100" class="gauge-bg" />
-              <circle cx="120" cy="120" r="100" class="gauge-fill" id="gaugeCircle" />
-            </svg>
-            <div class="gauge-text">
-              <h2 id="totalScore" aria-live="polite" aria-atomic="true">0.0</h2>
-              <p>kg CO₂e</p>
+        <!-- Utilities -->
+        <div class="input-group">
+          <div class="input-label">
+            <label for="energy">Monthly Grid Electricity</label>
+            <span class="value" id="energyVal" aria-live="polite">300 kWh</span>
+          </div>
+          <input type="range" class="slider" id="energy" min="0" max="1500" value="300" 
+                 oninput="handleSliderChange('energy', 'energyVal', ' kWh')" 
+                 aria-valuemin="0" aria-valuemax="1500" aria-valuenow="300" aria-describedby="energyVal">
+          
+          <div style="margin-top: 0.75rem;">
+            <label for="fuelType" class="sr-only">Choose Energy Type</label>
+            <select class="select-dropdown" id="fuelType" onchange="throttledCalculate()">
+              <option value="electricity_us_avg">US Power Grid (Average)</option>
+              <option value="electricity_eu_avg">European Power Grid (Average)</option>
+              <option value="electricity_green">100% Green / Solar Electricity</option>
+              <option value="natural_gas">Natural Gas Heating</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Diet -->
+        <div class="input-group" style="margin-bottom: 0;">
+          <div class="input-label">
+            <label for="dietDays">Diet Duration</label>
+            <span class="value" id="dietVal" aria-live="polite">30 Days</span>
+          </div>
+          <input type="range" class="slider" id="dietDays" min="1" max="365" value="30" 
+                 oninput="handleSliderChange('dietDays', 'dietVal', ' Days')" 
+                 aria-valuemin="1" aria-valuemax="365" aria-valuenow="30" aria-describedby="dietVal">
+          
+          <div style="margin-top: 0.75rem;">
+            <label for="dietType" class="sr-only">Choose Diet Type</label>
+            <select class="select-dropdown" id="dietType" onchange="throttledCalculate()">
+              <option value="meat_medium">Average Diet (Moderate Meat)</option>
+              <option value="meat_heavy">Heavy Meat Diet (Beef/Lamb intensive)</option>
+              <option value="vegetarian">Vegetarian (No Meat)</option>
+              <option value="vegan">100% Vegan (Plant-based)</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <!-- Results Visualization Card -->
+      <section class="card results-display" aria-label="Footprint Results">
+        <div class="card-title" style="width: 100%;">
+          📊 Carbon Summary
+        </div>
+
+        <!-- SVG Gauge wrapper (hidden from screen reader path) -->
+        <div class="gauge-wrapper" aria-hidden="true">
+          <svg width="240" height="240" class="gauge-svg">
+            <circle cx="120" cy="120" r="100" class="gauge-bg" />
+            <circle cx="120" cy="120" r="100" class="gauge-fill" id="gaugeCircle" />
+          </svg>
+          <div class="gauge-text">
+            <h2 id="totalScore">0.0</h2>
+            <p>kg CO₂e</p>
+          </div>
+        </div>
+        
+        <!-- Accessible Summary container -->
+        <div class="sr-only" aria-live="polite" id="accessibleSummary">
+          Total carbon footprint emissions is 0.0 kilograms.
+        </div>
+
+        <!-- Sector Breakdown Chart -->
+        <div class="breakdown-chart" role="img" aria-label="Emissions breakdown bar charts">
+          <!-- Transport Bar -->
+          <div class="bar-row">
+            <div class="bar-header">
+              <span>Transport</span>
+              <span id="transScore" aria-live="polite">0 kg</span>
+            </div>
+            <div class="bar-track">
+              <div class="bar-fill bar-transport" id="barTransport" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
             </div>
           </div>
 
-          <div class="breakdown-chart" role="region" aria-label="Emissions breakdown by category">
-            <div class="bar-row">
-              <div class="bar-header">
-                <span id="transport-header">Transport</span>
-                <span id="transScore" aria-live="polite" aria-atomic="true">0 kg</span>
-              </div>
-              <div
-                class="bar-track"
-                role="progressbar"
-                aria-labelledby="transport-header"
-                aria-valuemin="0"
-                aria-valuemax="100"
-                aria-valuenow="0"
-                id="barTransportTrack"
-              >
-                <div class="bar-fill bar-transport" id="barTransport"></div>
-              </div>
+          <!-- Utility Bar -->
+          <div class="bar-row">
+            <div class="bar-header">
+              <span>Utilities</span>
+              <span id="utilScore" aria-live="polite">0 kg</span>
             </div>
-
-            <div class="bar-row">
-              <div class="bar-header">
-                <span id="utility-header">Utilities</span>
-                <span id="utilScore" aria-live="polite" aria-atomic="true">0 kg</span>
-              </div>
-              <div
-                class="bar-track"
-                role="progressbar"
-                aria-labelledby="utility-header"
-                aria-valuemin="0"
-                aria-valuemax="100"
-                aria-valuenow="0"
-                id="barUtilityTrack"
-              >
-                <div class="bar-fill bar-utility" id="barUtility"></div>
-              </div>
-            </div>
-
-            <div class="bar-row">
-              <div class="bar-header">
-                <span id="diet-header">Diet</span>
-                <span id="dietScore" aria-live="polite" aria-atomic="true">0 kg</span>
-              </div>
-              <div
-                class="bar-track"
-                role="progressbar"
-                aria-labelledby="diet-header"
-                aria-valuemin="0"
-                aria-valuemax="100"
-                aria-valuenow="0"
-                id="barDietTrack"
-              >
-                <div class="bar-fill bar-diet" id="barDiet"></div>
-              </div>
+            <div class="bar-track">
+              <div class="bar-fill bar-utility" id="barUtility" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
             </div>
           </div>
 
-          <div class="nudges-box" role="note" aria-labelledby="nudge-title">
-            <div class="nudges-title" id="nudge-title">
-              ✨ Sustainable Recommendations
+          <!-- Diet Bar -->
+          <div class="bar-row">
+            <div class="bar-header">
+              <span>Diet</span>
+              <span id="dietScore" aria-live="polite">0 kg</span>
             </div>
-            <p id="nudgeText">Calculating suggestions based on your ecological footprint...</p>
+            <div class="bar-track">
+              <div class="bar-fill bar-diet" id="barDiet" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
+            </div>
           </div>
-        </section>
-      </div>
+        </div>
+
+        <!-- Smart Nudges -->
+        <div class="nudges-box" aria-live="polite">
+          <div class="nudges-title">
+            ✨ Sustainable Recommendations
+          </div>
+          <p id="nudgeText">Calculating suggestions based on your ecological footprint...</p>
+        </div>
+      </section>
     </main>
   </div>
 
   <script>
+    // Local fallback calculation factors
     const LOCAL_FACTORS = {
       transport: { petrol_car_medium: 0.170, diesel_car_medium: 0.165, electric_car: 0.045, bus: 0.096, rail: 0.035 },
       utility: { electricity_us_avg: 0.370, electricity_eu_avg: 0.230, electricity_green: 0.015, natural_gas: 0.185 },
       diet: { meat_heavy: 7.20, meat_medium: 5.40, vegetarian: 3.80, vegan: 2.90 }
     };
 
+    let apiOnline = false;
+
+    // Dashboard initialization (Replaces old login session checks)
+    function initDashboard() {
+      restoreState();
+      checkEngineStatus();
+    }
+
+    // Local Storage Data Persistence
+    function saveState() {
+      const state = {
+        distance: document.getElementById("distance").value,
+        vehicleType: document.getElementById("vehicleType").value,
+        energy: document.getElementById("energy").value,
+        fuelType: document.getElementById("fuelType").value,
+        dietDays: document.getElementById("dietDays").value,
+        dietType: document.getElementById("dietType").value
+      };
+      localStorage.setItem("ecosphere_state", JSON.stringify(state));
+    }
+
+    function restoreState() {
+      const stateStr = localStorage.getItem("ecosphere_state");
+      if (stateStr) {
+        try {
+          const state = JSON.parse(stateStr);
+          document.getElementById("distance").value = state.distance;
+          document.getElementById("vehicleType").value = state.vehicleType;
+          document.getElementById("energy").value = state.energy;
+          document.getElementById("fuelType").value = state.fuelType;
+          document.getElementById("dietDays").value = state.dietDays;
+          document.getElementById("dietType").value = state.dietType;
+        } catch(e) {
+          console.error("Failed parsing restored state storage", e);
+        }
+      }
+    }
+
+    // Verify Backend Status
+    async function checkEngineStatus() {
+      const statusDot = document.getElementById("statusDot");
+      const statusText = document.getElementById("statusText");
+      
+      try {
+        const res = await fetch("/");
+        if (res.ok) {
+          apiOnline = true;
+          statusDot.className = "status-dot active";
+          statusText.innerText = "Calculation Engine Online (API Mode)";
+        } else {
+          throw new Error();
+        }
+      } catch (e) {
+        apiOnline = false;
+        statusDot.className = "status-dot fallback";
+        statusText.innerText = "Offline (Local Calculation Mode)";
+      }
+      calculateEmissions();
+    }
+
+    // Performance Optimization: 100ms Throttle function
+    function throttle(func, limit) {
+      let inThrottle;
+      return function() {
+        const args = arguments;
+        const context = this;
+        if (!inThrottle) {
+          func.apply(context, args);
+          inThrottle = true;
+          setTimeout(() => inThrottle = false, limit);
+        }
+      }
+    }
+
+    const throttledCalculate = throttle(() => {
+      calculateEmissions();
+      saveState();
+    }, 100);
+
+    // Responsive Slider Visual Feedback handler (instantly updates labels, throttles calculation)
+    function handleSliderChange(sliderId, displayValId, unitSuffix) {
+      const value = document.getElementById(sliderId).value;
+      document.getElementById(displayValId).innerText = `${value}${unitSuffix}`;
+      
+      // Update ARIA values dynamically
+      const slider = document.getElementById(sliderId);
+      slider.setAttribute("aria-valuenow", value);
+
+      // Trigger throttled calculation
+      throttledCalculate();
+    }
+
+    // Emission calculations engine
     async function calculateEmissions() {
       const distance = parseFloat(document.getElementById("distance").value);
       const vehicleType = document.getElementById("vehicleType").value;
       const energy = parseFloat(document.getElementById("energy").value);
       const fuelType = document.getElementById("fuelType").value;
-      const days = parseInt(document.getElementById("dietDays").value, 10);
+      const days = parseInt(document.getElementById("dietDays").value);
       const dietType = document.getElementById("dietType").value;
-
-      document.getElementById("distVal").innerText = `${distance} km`;
-      document.getElementById("energyVal").innerText = `${energy} kWh`;
-      document.getElementById("dietVal").innerText = `${days} Days`;
 
       let transportEmissions = 0;
       let utilityEmissions = 0;
       let dietEmissions = 0;
       let totalEmissions = 0;
 
-      try {
-        const res = await fetch("/calculate/summary", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            transport: { distance_km: distance, vehicle_type: vehicleType },
-            utility: { energy_kwh: energy, fuel_type: fuelType },
-            diet: { days: days, diet_type: dietType }
-          })
-        });
-
-        const isOk = res.ok;
-        const data = isOk ? await res.json() : null;
-
-        if (isOk && data) {
-          transportEmissions = data.breakdown.transport_kg_co2e;
-          utilityEmissions = data.breakdown.utility_kg_co2e;
-          dietEmissions = data.breakdown.diet_kg_co2e;
-          totalEmissions = data.total_emissions_kg_co2e;
-        } else {
-          throw new Error("API error");
+      if (apiOnline) {
+        try {
+          const res = await fetch("/calculate/summary", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              transport: { distance_km: distance, vehicle_type: vehicleType },
+              utility: { energy_kwh: energy, fuel_type: fuelType },
+              diet: { days: days, diet_type: dietType }
+            })
+          });
+          if (res.ok) {
+            const data = await res.json();
+            transportEmissions = data.breakdown.transport_kg_co2e;
+            utilityEmissions = data.breakdown.utility_kg_co2e;
+            dietEmissions = data.breakdown.diet_kg_co2e;
+            totalEmissions = data.total_emissions_kg_co2e;
+          } else {
+            throw new Error();
+          }
+        } catch (e) {
+          console.warn("FastAPI fetch failed, falling back to local client-side logic.");
+          apiOnline = false;
+          document.getElementById("statusDot").className = "status-dot fallback";
+          document.getElementById("statusText").innerText = "Offline (Local Calculation Mode)";
         }
-      } catch (e) {
-        transportEmissions = +(distance * LOCAL_FACTORS.transport[vehicleType]).toFixed(3);
-        utilityEmissions = +(energy * LOCAL_FACTORS.utility[fuelType]).toFixed(3);
-        dietEmissions = +(days * LOCAL_FACTORS.diet[dietType]).toFixed(3);
-        totalEmissions = +(transportEmissions + utilityEmissions + dietEmissions).toFixed(3);
+      }
+
+      // Local fallback calculation if API is offline
+      if (!apiOnline) {
+        transportEmissions = Math.round(distance * LOCAL_FACTORS.transport[vehicleType] * 1000) / 1000;
+        utilityEmissions = Math.round(energy * LOCAL_FACTORS.utility[fuelType] * 1000) / 1000;
+        dietEmissions = Math.round(days * LOCAL_FACTORS.diet[dietType] * 1000) / 1000;
+        totalEmissions = Math.round((transportEmissions + utilityEmissions + dietEmissions) * 1000) / 1000;
       }
 
       updateUI(transportEmissions, utilityEmissions, dietEmissions, totalEmissions);
     }
 
+    // Refresh UI elements
     function updateUI(tVal, uVal, dVal, total) {
       document.getElementById("totalScore").innerText = total.toFixed(1);
       document.getElementById("transScore").innerText = `${tVal.toFixed(1)} kg`;
       document.getElementById("utilScore").innerText = `${uVal.toFixed(1)} kg`;
       document.getElementById("dietScore").innerText = `${dVal.toFixed(1)} kg`;
 
+      // Update Screen Reader summary text for A11y
+      document.getElementById("accessibleSummary").innerText = 
+        `Total carbon footprint emissions is ${total.toFixed(1)} kilograms. Transport emissions: ${tVal.toFixed(1)} kilograms. Utility emissions: ${uVal.toFixed(1)} kilograms. Diet emissions: ${dVal.toFixed(1)} kilograms.`;
+
+      // Update circular SVG gauge
       const circle = document.getElementById("gaugeCircle");
-      const maxTarget = 800;
+      const maxTarget = 800; 
       const percentage = Math.min((total / maxTarget), 1);
       const dashoffset = 628 - (628 * percentage);
       circle.style.strokeDashoffset = dashoffset;
@@ -642,15 +691,25 @@
         circle.style.stroke = "var(--primary)";
       }
 
+      // Update Horizontal Progress Bars
       const maxSub = Math.max(tVal, uVal, dVal, 1);
-      document.getElementById("barTransport").style.width = `${(tVal / maxSub) * 100}%`;
-      document.getElementById("barUtility").style.width = `${(uVal / maxSub) * 100}%`;
-      document.getElementById("barDiet").style.width = `${(dVal / maxSub) * 100}%`;
+      
+      const transBar = document.getElementById("barTransport");
+      const transPct = Math.round((tVal / maxSub) * 100);
+      transBar.style.width = `${transPct}%`;
+      transBar.setAttribute("aria-valuenow", transPct);
 
-      document.getElementById("barTransportTrack").setAttribute("aria-valuenow", Math.round((tVal / maxSub) * 100));
-      document.getElementById("barUtilityTrack").setAttribute("aria-valuenow", Math.round((uVal / maxSub) * 100));
-      document.getElementById("barDietTrack").setAttribute("aria-valuenow", Math.round((dVal / maxSub) * 100));
+      const utilBar = document.getElementById("barUtility");
+      const utilPct = Math.round((uVal / maxSub) * 100);
+      utilBar.style.width = `${utilPct}%`;
+      utilBar.setAttribute("aria-valuenow", utilPct);
 
+      const dietBar = document.getElementById("barDiet");
+      const dietPct = Math.round((dVal / maxSub) * 100);
+      dietBar.style.width = `${dietPct}%`;
+      dietBar.setAttribute("aria-valuenow", dietPct);
+
+      // Generate dynamic recommendations
       let nudge = "";
       if (tVal > uVal && tVal > dVal) {
         nudge = "⚡ Aapka commuting output sabse zyada hai! Carbon footprint kam karne ke liye public transit ka use badhayein ya EV standard adopt karein.";
@@ -664,7 +723,8 @@
       document.getElementById("nudgeText").innerText = nudge;
     }
 
-    window.onload = calculateEmissions;
+    // Run on startup
+    window.onload = initDashboard;
   </script>
 </body>
 </html>
