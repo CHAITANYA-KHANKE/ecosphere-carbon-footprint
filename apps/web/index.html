@@ -546,11 +546,26 @@
       if (stateStr) {
         try {
           const state = JSON.parse(stateStr);
-          document.getElementById("distance").value = state.distance;
+          
+          const distInput = document.getElementById("distance");
+          distInput.value = state.distance;
+          distInput.setAttribute("aria-valuenow", state.distance);
+          document.getElementById("distVal").innerText = `${state.distance} km`;
+          
           document.getElementById("vehicleType").value = state.vehicleType;
-          document.getElementById("energy").value = state.energy;
+          
+          const energyInput = document.getElementById("energy");
+          energyInput.value = state.energy;
+          energyInput.setAttribute("aria-valuenow", state.energy);
+          document.getElementById("energyVal").innerText = `${state.energy} kWh`;
+          
           document.getElementById("fuelType").value = state.fuelType;
-          document.getElementById("dietDays").value = state.dietDays;
+          
+          const dietInput = document.getElementById("dietDays");
+          dietInput.value = state.dietDays;
+          dietInput.setAttribute("aria-valuenow", state.dietDays);
+          document.getElementById("dietVal").innerText = `${state.dietDays} Days`;
+          
           document.getElementById("dietType").value = state.dietType;
         } catch(e) {
           console.error("Failed parsing restored state storage", e);
