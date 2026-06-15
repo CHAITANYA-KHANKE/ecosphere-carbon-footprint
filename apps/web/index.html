@@ -16,13 +16,13 @@
       --bg-dark: #0f172a;
       --bg-card: rgba(30, 41, 59, 0.7);
       --border-card: rgba(255, 255, 255, 0.08);
-      --primary: #10b981;      /* Emerald eco accent */
-      --primary-glow: rgba(16, 185, 129, 0.15);
-      --secondary: #6366f1;    /* Indigo */
-      --secondary-glow: rgba(99, 102, 241, 0.15);
-      --accent: #f43f5e;       /* Rose for warnings */
+      --primary: #34d399;      /* Emerald eco accent (high contrast WCAG 4.5:1) */
+      --primary-glow: rgba(52, 211, 153, 0.15);
+      --secondary: #818cf8;    /* Indigo (high contrast WCAG 4.5:1) */
+      --secondary-glow: rgba(129, 140, 248, 0.15);
+      --accent: #fb7185;       /* Rose for warnings (high contrast WCAG 4.5:1) */
       --text-main: #f8fafc;
-      --text-muted: #94a3b8;
+      --text-muted: #cbd5e1;   /* Increased text contrast from #94a3b8 */
       --font-display: 'Outfit', sans-serif;
       --font-sans: 'Plus Jakarta Sans', sans-serif;
     }
@@ -36,8 +36,8 @@
 
     body {
       background-color: var(--bg-dark);
-      background-image: radial-gradient(circle at 10% 20%, rgba(16, 185, 129, 0.05) 0%, transparent 40%),
-                        radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.05) 0%, transparent 45%);
+      background-image: radial-gradient(circle at 10% 20%, rgba(52, 211, 153, 0.05) 0%, transparent 40%),
+                        radial-gradient(circle at 90% 80%, rgba(129, 140, 248, 0.05) 0%, transparent 45%);
       color: var(--text-main);
       font-family: var(--font-sans), system-ui, sans-serif;
       min-height: 100vh;
@@ -95,7 +95,7 @@
       font-size: 3rem;
       font-weight: 800;
       letter-spacing: -0.05em;
-      background: linear-gradient(135deg, #34d399 0%, #6366f1 100%);
+      background: linear-gradient(135deg, #34d399 0%, #818cf8 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       margin-bottom: 0.5rem;
@@ -342,8 +342,8 @@
       margin-top: 1.5rem;
       padding: 1.25rem;
       border-radius: 16px;
-      background: rgba(16, 185, 129, 0.06);
-      border: 1px dashed rgba(16, 185, 129, 0.2);
+      background: rgba(52, 211, 153, 0.06);
+      border: 1px dashed rgba(52, 211, 153, 0.2);
       text-align: left;
       font-size: 0.9rem;
       width: 100%;
@@ -524,13 +524,13 @@
         
         <div style="display: flex; flex-direction: column; gap: 1.5rem; flex-grow: 1; justify-content: space-between;">
           <!-- Annual Projection -->
-          <div style="background: rgba(99, 102, 241, 0.05); border: 1px solid rgba(99, 102, 241, 0.12); padding: 1.25rem; border-radius: 16px;">
+          <div style="background: rgba(129, 140, 248, 0.05); border: 1px solid rgba(129, 140, 248, 0.12); padding: 1.25rem; border-radius: 16px;">
             <div style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Annualized Projection</div>
             <div style="font-family: var(--font-display); font-size: 1.8rem; font-weight: 800; color: var(--secondary); margin-top: 0.25rem;" id="annualProjection" aria-live="polite">0.00 tonnes/year</div>
           </div>
 
           <!-- Tree Offset Simulator -->
-          <div style="background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.12); padding: 1.25rem; border-radius: 16px;">
+          <div style="background: rgba(52, 211, 153, 0.05); border: 1px solid rgba(52, 211, 153, 0.12); padding: 1.25rem; border-radius: 16px;">
             <div style="font-weight: 700; color: var(--primary); margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.4rem; font-size: 0.95rem;">
               <span>🌲 Tree Offset Simulator</span>
             </div>
@@ -603,9 +603,25 @@
     };
 
     let apiOnline = false;
+    const DOM = {};
+
+    // Cache DOM lookups for high-performance slider drag response
+    function cacheDOM() {
+      const ids = [
+        "distance", "vehicleType", "energy", "fuelType", "dietDays", "dietType",
+        "distVal", "energyVal", "dietVal", "statusDot", "statusText",
+        "totalScore", "transScore", "utilScore", "dietScore", "accessibleSummary",
+        "gaugeCircle", "barTransport", "barUtility", "barDiet",
+        "annualProjection", "treesNeeded", "userTonnes", "barUserTonnes", "nudgeText"
+      ];
+      ids.forEach(id => {
+        DOM[id] = document.getElementById(id);
+      });
+    }
 
     // Dashboard initialization
     function initDashboard() {
+      cacheDOM();
       restoreState();
       checkEngineStatus();
     }
@@ -613,12 +629,12 @@
     // Local Storage Data Persistence
     function saveState() {
       const state = {
-        distance: document.getElementById("distance").value,
-        vehicleType: document.getElementById("vehicleType").value,
-        energy: document.getElementById("energy").value,
-        fuelType: document.getElementById("fuelType").value,
-        dietDays: document.getElementById("dietDays").value,
-        dietType: document.getElementById("dietType").value
+        distance: DOM.distance.value,
+        vehicleType: DOM.vehicleType.value,
+        energy: DOM.energy.value,
+        fuelType: DOM.fuelType.value,
+        dietDays: DOM.dietDays.value,
+        dietType: DOM.dietType.value
       };
       localStorage.setItem("ecosphere_state", JSON.stringify(state));
     }
@@ -629,26 +645,23 @@
         try {
           const state = JSON.parse(stateStr);
           
-          const distInput = document.getElementById("distance");
-          distInput.value = state.distance;
-          distInput.setAttribute("aria-valuenow", state.distance);
-          document.getElementById("distVal").innerText = `${state.distance} km`;
+          DOM.distance.value = state.distance;
+          DOM.distance.setAttribute("aria-valuenow", state.distance);
+          DOM.distVal.innerText = `${state.distance} km`;
           
-          document.getElementById("vehicleType").value = state.vehicleType;
+          DOM.vehicleType.value = state.vehicleType;
           
-          const energyInput = document.getElementById("energy");
-          energyInput.value = state.energy;
-          energyInput.setAttribute("aria-valuenow", state.energy);
-          document.getElementById("energyVal").innerText = `${state.energy} kWh`;
+          DOM.energy.value = state.energy;
+          DOM.energy.setAttribute("aria-valuenow", state.energy);
+          DOM.energyVal.innerText = `${state.energy} kWh`;
           
-          document.getElementById("fuelType").value = state.fuelType;
+          DOM.fuelType.value = state.fuelType;
           
-          const dietInput = document.getElementById("dietDays");
-          dietInput.value = state.dietDays;
-          dietInput.setAttribute("aria-valuenow", state.dietDays);
-          document.getElementById("dietVal").innerText = `${state.dietDays} Days`;
+          DOM.dietDays.value = state.dietDays;
+          DOM.dietDays.setAttribute("aria-valuenow", state.dietDays);
+          DOM.dietVal.innerText = `${state.dietDays} Days`;
           
-          document.getElementById("dietType").value = state.dietType;
+          DOM.dietType.value = state.dietType;
         } catch(e) {
           console.error("Failed parsing restored state storage", e);
         }
@@ -657,22 +670,19 @@
 
     // Verify Backend Status
     async function checkEngineStatus() {
-      const statusDot = document.getElementById("statusDot");
-      const statusText = document.getElementById("statusText");
-      
       try {
         const res = await fetch("/");
         if (res.ok) {
           apiOnline = true;
-          statusDot.className = "status-dot active";
-          statusText.innerText = "Calculation Engine Online (API Mode)";
+          DOM.statusDot.className = "status-dot active";
+          DOM.statusText.innerText = "Calculation Engine Online (API Mode)";
         } else {
           throw new Error();
         }
       } catch (e) {
         apiOnline = false;
-        statusDot.className = "status-dot fallback";
-        statusText.innerText = "Offline (Local Calculation Mode)";
+        DOM.statusDot.className = "status-dot fallback";
+        DOM.statusText.innerText = "Offline (Local Calculation Mode)";
       }
       calculateEmissions();
     }
@@ -698,12 +708,9 @@
 
     // Responsive Slider Visual Feedback handler
     function handleSliderChange(sliderId, displayValId, unitSuffix) {
-      const value = document.getElementById(sliderId).value;
-      document.getElementById(displayValId).innerText = `${value}${unitSuffix}`;
-      
-      // Update ARIA values dynamically
-      const slider = document.getElementById(sliderId);
-      slider.setAttribute("aria-valuenow", value);
+      const value = DOM[sliderId].value;
+      DOM[displayValId].innerText = `${value}${unitSuffix}`;
+      DOM[sliderId].setAttribute("aria-valuenow", value);
 
       // Trigger throttled calculation
       throttledCalculate();
@@ -711,12 +718,12 @@
 
     // Emission calculations engine
     async function calculateEmissions() {
-      const distance = parseFloat(document.getElementById("distance").value);
-      const vehicleType = document.getElementById("vehicleType").value;
-      const energy = parseFloat(document.getElementById("energy").value);
-      const fuelType = document.getElementById("fuelType").value;
-      const days = parseInt(document.getElementById("dietDays").value);
-      const dietType = document.getElementById("dietType").value;
+      const distance = parseFloat(DOM.distance.value);
+      const vehicleType = DOM.vehicleType.value;
+      const energy = parseFloat(DOM.energy.value);
+      const fuelType = DOM.fuelType.value;
+      const days = parseInt(DOM.dietDays.value);
+      const dietType = DOM.dietType.value;
 
       let transportEmissions = 0;
       let utilityEmissions = 0;
@@ -746,8 +753,8 @@
         } catch (e) {
           console.warn("FastAPI fetch failed, falling back to local client-side logic.");
           apiOnline = false;
-          document.getElementById("statusDot").className = "status-dot fallback";
-          document.getElementById("statusText").innerText = "Offline (Local Calculation Mode)";
+          DOM.statusDot.className = "status-dot fallback";
+          DOM.statusText.innerText = "Offline (Local Calculation Mode)";
         }
       }
 
@@ -764,61 +771,57 @@
 
     // Refresh UI elements
     function updateUI(tVal, uVal, dVal, total) {
-      document.getElementById("totalScore").innerText = total.toFixed(1);
-      document.getElementById("transScore").innerText = `${tVal.toFixed(1)} kg`;
-      document.getElementById("utilScore").innerText = `${uVal.toFixed(1)} kg`;
-      document.getElementById("dietScore").innerText = `${dVal.toFixed(1)} kg`;
+      DOM.totalScore.innerText = total.toFixed(1);
+      DOM.transScore.innerText = `${tVal.toFixed(1)} kg`;
+      DOM.utilScore.innerText = `${uVal.toFixed(1)} kg`;
+      DOM.dietScore.innerText = `${dVal.toFixed(1)} kg`;
 
       // Update Screen Reader summary text for A11y
-      document.getElementById("accessibleSummary").innerText = 
+      DOM.accessibleSummary.innerText = 
         `Total carbon footprint emissions is ${total.toFixed(1)} kilograms. Transport emissions: ${tVal.toFixed(1)} kilograms. Utility emissions: ${uVal.toFixed(1)} kilograms. Diet emissions: ${dVal.toFixed(1)} kilograms.`;
 
       // Update circular SVG gauge
-      const circle = document.getElementById("gaugeCircle");
       const maxTarget = 800; 
       const percentage = Math.min((total / maxTarget), 1);
       const dashoffset = 628 - (628 * percentage);
-      circle.style.strokeDashoffset = dashoffset;
+      DOM.gaugeCircle.style.strokeDashoffset = dashoffset;
 
       if (total > 500) {
-        circle.style.stroke = "var(--accent)";
+        DOM.gaugeCircle.style.stroke = "var(--accent)";
       } else if (total > 200) {
-        circle.style.stroke = "var(--secondary)";
+        DOM.gaugeCircle.style.stroke = "var(--secondary)";
       } else {
-        circle.style.stroke = "var(--primary)";
+        DOM.gaugeCircle.style.stroke = "var(--primary)";
       }
 
       // Update Horizontal Progress Bars
       const maxSub = Math.max(tVal, uVal, dVal, 1);
       
-      const transBar = document.getElementById("barTransport");
       const transPct = Math.round((tVal / maxSub) * 100);
-      transBar.style.width = `${transPct}%`;
-      transBar.setAttribute("aria-valuenow", transPct);
+      DOM.barTransport.style.width = `${transPct}%`;
+      DOM.barTransport.setAttribute("aria-valuenow", transPct);
 
-      const utilBar = document.getElementById("barUtility");
       const utilPct = Math.round((uVal / maxSub) * 100);
-      utilBar.style.width = `${utilPct}%`;
-      utilBar.setAttribute("aria-valuenow", utilPct);
+      DOM.barUtility.style.width = `${utilPct}%`;
+      DOM.barUtility.setAttribute("aria-valuenow", utilPct);
 
-      const dietBar = document.getElementById("barDiet");
       const dietPct = Math.round((dVal / maxSub) * 100);
-      dietBar.style.width = `${dietPct}%`;
-      dietBar.setAttribute("aria-valuenow", dietPct);
+      DOM.barDiet.style.width = `${dietPct}%`;
+      DOM.barDiet.setAttribute("aria-valuenow", dietPct);
 
       // --- Eco-Offsets & Targets calculations ---
       const annualKg = total * 12;
       const annualTonnes = annualKg / 1000;
       const trees = Math.round(annualKg / 22);
 
-      document.getElementById("annualProjection").innerText = `${annualTonnes.toFixed(2)} tonnes/year`;
-      document.getElementById("treesNeeded").innerText = trees;
-      document.getElementById("userTonnes").innerText = `${annualTonnes.toFixed(2)} t`;
+      DOM.annualProjection.innerText = `${annualTonnes.toFixed(2)} tonnes/year`;
+      DOM.treesNeeded.innerText = trees;
+      DOM.userTonnes.innerText = `${annualTonnes.toFixed(2)} t`;
 
       // Update comparison bars (Max scale reference: 16 tonnes)
       const maxRef = 16;
       const userPct = Math.min((annualTonnes / maxRef) * 100, 100);
-      document.getElementById("barUserTonnes").style.width = `${userPct}%`;
+      DOM.barUserTonnes.style.width = `${userPct}%`;
 
       // Generate dynamic recommendations
       let nudge = "";
@@ -831,7 +834,7 @@
       } else {
         nudge = "🌳 Excellent status! Aapke patterns balanced hain. Carbon emission budgets optimize rakhne ke liye yahi behavior regular monitor karein.";
       }
-      document.getElementById("nudgeText").innerText = nudge;
+      DOM.nudgeText.innerText = nudge;
     }
 
     // Run on startup
