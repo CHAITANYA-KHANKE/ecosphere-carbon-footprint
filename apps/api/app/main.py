@@ -55,7 +55,7 @@ async def add_security_headers(request, call_next):
     response.headers["Strict-Transport-Security"] = "max-age=63072000; includeSubDomains; preload"
     response.headers["Content-Security-Policy"] = (
         "default-src 'self' https:; "
-        "script-src 'self'; "
+        "script-src 'self' 'unsafe-inline'; "
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
         "font-src https://fonts.gstatic.com;"
     )
@@ -73,10 +73,6 @@ app.add_middleware(
     allow_methods=["GET", "POST"],
     allow_headers=["Content-Type"],
 )
-
-# Static files hosting
-WEB_DIR = Path(__file__).resolve().parent.parent.parent / "web"
-app.mount("/web", StaticFiles(directory=str(WEB_DIR)), name="web")
 
 # Request Models
 class TransportRequest(BaseModel):

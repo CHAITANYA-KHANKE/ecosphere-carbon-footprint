@@ -220,8 +220,3 @@ def test_serve_frontend_missing_file():
         response = client.get("/app")
         assert response.status_code == 500
         assert "Frontend not found" in response.json()["detail"]["error"]
-
-def test_serve_static_script():
-    response = client.get("/web/script.js")
-    assert response.status_code == 200
-    assert "LOCAL_FACTORS" in response.text
