@@ -1,3 +1,24 @@
+// Visual error reporter for quick debugging in strict CSP environment
+window.onerror = function(message, source, lineno, colno, error) {
+  const banner = document.createElement("div");
+  banner.style.position = "fixed";
+  banner.style.top = "0";
+  banner.style.left = "0";
+  banner.style.width = "100%";
+  banner.style.background = "#fb7185";
+  banner.style.color = "#0f172a";
+  banner.style.padding = "12px 20px";
+  banner.style.zIndex = "999999";
+  banner.style.fontWeight = "bold";
+  banner.style.fontFamily = "sans-serif";
+  banner.style.fontSize = "14px";
+  banner.style.textAlign = "center";
+  banner.style.boxShadow = "0 4px 12px rgba(0,0,0,0.3)";
+  banner.innerText = `[JS Error] ${message} | File: ${source} | Line: ${lineno}:${colno}`;
+  document.body.appendChild(banner);
+  return false;
+};
+
 // Local fallback calculation factors
 const LOCAL_FACTORS = {
   transport: { petrol_car_medium: 0.170, diesel_car_medium: 0.165, electric_car: 0.045, bus: 0.096, rail: 0.035 },
