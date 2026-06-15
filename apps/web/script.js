@@ -108,6 +108,7 @@ const throttledCalculate = throttle(() => {
   calculateEmissions();
   saveState();
 }, 100);
+window.throttledCalculate = throttledCalculate;
 
 // Responsive Slider Visual Feedback handler
 function handleSliderChange(sliderId, displayValId, unitSuffix) {
