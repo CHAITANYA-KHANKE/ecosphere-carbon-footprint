@@ -263,5 +263,9 @@ function updateUI(tVal, uVal, dVal, total) {
   DOM.nudgeText.innerText = nudge;
 }
 
-// Run on startup
-window.onload = initDashboard;
+// Run on startup - robust browser ready state handling to resolve race conditions
+if (document.readyState === "complete" || document.readyState === "interactive") {
+  initDashboard();
+} else {
+  window.addEventListener("DOMContentLoaded", initDashboard);
+}
