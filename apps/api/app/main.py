@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from typing import Dict, Any
 from pathlib import Path
@@ -49,7 +50,7 @@ async def add_security_headers(request, call_next):
     response.headers["Strict-Transport-Security"] = "max-age=63072000; includeSubDomains; preload"
     response.headers["Content-Security-Policy"] = (
         "default-src 'self' https:; "
-        "script-src 'self' 'unsafe-inline'; "
+        "script-src 'self'; "
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
         "font-src https://fonts.gstatic.com;"
     )
@@ -63,10 +64,14 @@ async def add_security_headers(request, call_next):
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_credentials=False,
+    allow_methods=["GET", "POST"],
+    allow_headers=["Content-Type"],
 )
+
+# Static files hosting
+WEB_DIR = Path(__file__).resolve().parent.parent.parent / "web"
+app.mount("/web", StaticFiles(directory=str(WEB_DIR)), name="web")
 
 # Request Models
 class TransportRequest(BaseModel):
