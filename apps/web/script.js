@@ -119,6 +119,7 @@ function handleSliderChange(sliderId, displayValId, unitSuffix) {
   // Trigger throttled calculation
   throttledCalculate();
 }
+window.handleSliderChange = handleSliderChange;
 
 // Emission calculations engine
 async function calculateEmissions() {

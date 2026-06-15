@@ -8,6 +8,11 @@ from typing import Dict, Any
 from pathlib import Path
 from functools import lru_cache
 import logging
+import mimetypes
+
+# Fix Windows registry MIME type association issues for static JS files (resolves 'nosniff' blocks)
+mimetypes.add_type("application/javascript", ".js")
+mimetypes.add_type("text/css", ".css")
 
 # Set up logging for clean codebase verification
 logging.basicConfig(level=logging.INFO)
