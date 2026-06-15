@@ -1,79 +1,79 @@
-# EcoSphere: Carbon Footprint Awareness Platform
+# EcoTrack AI
 
-EcoSphere is a professional-grade personal sustainability and carbon emission tracking platform. It allows users to track daily activities, calculate carbon emissions against global benchmarks, simulate reductions, and gamify their sustainability journey.
+EcoTrack AI is a privacy-first carbon footprint awareness dashboard built with React, Vite, Tailwind CSS, Recharts, and browser storage.
 
-## Project Structure
+## Why it exists
 
+Carbon data is difficult to act on when it is abstract. EcoTrack turns daily travel, electricity, food, and waste activity into:
+
+- A transparent CO2e estimate and source breakdown
+- A sustainability score and impact category
+- Daily, weekly, and monthly progress analytics
+- Personalized, selectable eco goals
+- Achievements and a demo community leaderboard
+- Downloadable CSV and PDF summaries
+
+No account or API key is required. Data stays in the current browser through `localStorage`.
+
+## Run locally
+
+```bash
+npm install
+npm run dev
 ```
-carbon footprint\project/
-├── apps/
-│   ├── api/                  # Python FastAPI Backend
-│   │   ├── app/
-│   │   │   ├── core/         # Carbon calculations formulas
-│   │   │   ├── tests/        # Pytest unit tests
-│   │   │   └── main.py       # API router & middleware
-│   │   └── requirements.txt  # Python requirements
-│   └── web/                  # Static HTML SPA Frontend
-│       └── index.html        # Client-side UI (vanilla JS + CSS)
-├── docker-compose.yml        # Local development orchestrator
-└── README.md                 # Project Documentation
+
+Open `http://localhost:5173`.
+
+## Quality checks
+
+```bash
+npm run lint
+npm test
+npm run build
 ```
 
-## Setup & Local Run
+## Calculation methodology
 
-### Prerequisites
-*   Python 3.10+
-*   A modern web browser (Chrome, Firefox, Edge)
-*   Docker (Optional, for containers)
+The calculator uses configurable awareness estimates from `src/lib/carbon.js`:
 
-### Running the API (Backend)
-1. Navigate to the API directory:
-   ```bash
-   cd apps/api
-   ```
-2. Create and activate a virtual environment:
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
-3. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-4. Run the API server:
-   ```bash
-   uvicorn app.main:app --reload --port 8000
-   ```
-   API docs will be available at [http://localhost:8000/docs](http://localhost:8000/docs).
+| Source | Factor |
+|---|---:|
+| Car | 0.21 kg CO2e/km |
+| Bus | 0.08 kg CO2e/km |
+| Train | 0.05 kg CO2e/km |
+| Flight | 0.25 kg CO2e/km |
+| Electricity | 0.85 kg CO2e/kWh |
+| Waste | 0.45 kg CO2e/kg |
 
-### Running Frontend (Web Client)
-1. Navigate to the Web directory:
-    ```bash
-    cd apps/web
-    ```
-2. Open `index.html` directly in any modern browser, or serve it with:
-    ```bash
-    python -m http.server 8080
-    ```
-    Then visit [http://localhost:8080](http://localhost:8080).
+Food uses a daily estimate: vegan `1.5`, vegetarian `2.5`, and non-vegetarian `5.5` kg CO2e.
 
-## Calculation Formulas
-EcoSphere uses global coefficients to compute carbon equivalents (\(\text{CO}_2\text{e}\)):
+The result is an educational estimate, not a certified lifecycle assessment. Factors vary by vehicle, occupancy, electricity grid, route, and region.
+The tree estimate annualizes the daily footprint and divides it by an awareness assumption of `21 kg CO2` absorbed per mature tree per year.
 
-### 1. Transport Emissions
-\[\text{Emissions } (\text{kg CO}_2\text{e}) = d \times EF_{vehicle}\]
-*   \(d\): distance in kilometers (km)
-*   \(EF_{vehicle}\): Emission Factor (e.g., \(0.17\) for medium petrol car, \(0.04\) for electric car, \(0.03\) for rail transit)
+## Architecture
 
-### 2. Home Utility Emissions
-\[\text{Emissions } (\text{kg CO}_2\text{e}) = E \times EF_{grid}\]
-*   \(E\): energy in kilowatt-hours (kWh)
-*   \(EF_{grid}\): region-specific grid factor (e.g., \(0.37\) for default US average grid)
+```text
+src/
+  components/   Shared layout and UI
+  context/      Theme, profile, and local activity state
+  lib/          Calculation, recommendations, and aggregation
+  pages/        Dashboard experiences
+test/           Node-based unit tests for domain logic
+```
 
-### 3. Food Diet Emissions
-\[\text{Emissions } (\text{kg CO}_2\text{e}) = \sum (w_i \times EF_{diet\_i})\]
-*   \(w_i\): weight/servings consumed
-*   \(EF_{diet}\): food type factor (e.g., \(27.0\) for beef, \(6.9\) for chicken, \(2.0\) for vegetarian)
+## Accessibility
 
-## License
-MIT License.
+- Visible keyboard focus indicators
+- Semantic forms, fieldsets, tables, and navigation labels
+- Toggle state exposed with ARIA
+- Text summaries for data visualizations
+- Reduced-motion support
+
+## Deployment
+
+The project is a static single-page app. Vercel can deploy it with:
+
+- Build command: `npm run build`
+- Output directory: `dist`
+
+`vercel.json` provides the SPA route fallback.
